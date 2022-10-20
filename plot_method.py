@@ -4,7 +4,7 @@ import pandas as pd
 
 
 
-def plot(df:pd.DataFrame,Cav_name,save_mode=""):
+def plot_powerQ(df:pd.DataFrame, sample_name, cavity_label, output_path, save_mode=""):
     
     condi_1 = (df["Qi_dia_corr_err"] / df["Qi_dia_corr"] < 0.1)
     condi_2 = (df["absQc_err"] / df["Qc_dia_corr"] < 0.1)
@@ -18,7 +18,7 @@ def plot(df:pd.DataFrame,Cav_name,save_mode=""):
     Qi_err = df[(condi_1 | condi_2 | condi_3)]["Qi_dia_corr_err"]
     Qc_err = df[(condi_1 | condi_2 | condi_3)]["absQc_err"]
     Ql_err = df[(condi_1 | condi_2 | condi_3)]["Ql_err"]
-    
+
     plt.figure(figsize=(16,9),facecolor='white')
     plt.errorbar(x_axis,Qi,yerr=Qi_err, fmt="o",label="Qi")
     plt.errorbar(x_axis,Qc,yerr=Qc_err, fmt="o",label="Qc")
@@ -28,11 +28,12 @@ def plot(df:pd.DataFrame,Cav_name,save_mode=""):
     plt.ylabel("Q",fontsize=16)
     plt.yticks(fontsize=13)
     plt.legend()
-    plt.title(sample_name+"-"+Cav_name,fontsize=16)
+    plt.title( f"{sample_name}-{cavity_label}",fontsize=16)
     plt.yscale('log')
     plt.xscale('log')
+    plt.show()
     if save_mode == "save":
-        plt.savefig(fig_dir_sample+"/"+Cav_name+".png")
+        plt.savefig(f"{output_path}/{cavity_label}.png")
     plt.close()
     return {"x":x_axis,"y":Qi,"err":Qi_err}
 

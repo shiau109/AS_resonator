@@ -3,37 +3,31 @@ from shutil import rmtree
 from os.path import isfile, join,exists
 
 
-def check_configure( sample_name ):
+def check_configure( sample_fdname, subfd_names ):
+    rawdata_folder = f"{sample_fdname}/raw"
+    result_folder = f"{sample_fdname}/results"
 
-    result_folder = f"{fdName}/Results"
-    result_folder_sample = result_folder+"/"+sample_name
-    fig_dir_sample = result_folder+"/Figure/"+sample_name
-    para_dir_sample = result_folder+"/fit_paras/"+sample_name
 
-    goingon = 0
 
     if not exists(result_folder):
         makedirs(result_folder)
-        print("Results Directory created!")
+        print("Create results Directory!")
     else:
-        print("Results Directory Exist Keep going!")
+        print("Results Directory Exist, Keep going!")
 
-
-    if not exists(result_folder_sample):
-        makedirs(result_folder_sample)
-        print("Results Directory for this sample created!")
-        goingon += 1
-    else:
-        cover = input("This sample has a record, overwrite it or not (y/n): ")
-        if cover.lower() == "y" or cover.lower() == "yes":
-            rmtree(result_folder_sample)
-            rmtree(fig_dir_sample)
-            rmtree(para_dir_sample)
-            makedirs(result_folder_sample)
-            print("Results Directory for this sample renew!")
-            goingon += 1
+    for subfd in subfd_names:
+        subfd = f"{result_folder}/{subfd}"
+        if not exists(subfd):
+            makedirs(subfd)
+            print(f"Create subfolder {subfd} in result!")
         else:
-            print("Results for this sample Exist!")
+            cover = input("This sample has a record, overwrite it or not (y/n): ")
+            if cover.lower() == "y" or cover.lower() == "yes":
+                rmtree(subfd)
+                makedirs(subfd)
+                print(f"Subfolder {subfd}  this sample renew!")
+            else:
+                print(f"Results for this sample Exist!")
 
 def check_file_extension( fd_name:str, file_ext:str ):
     """

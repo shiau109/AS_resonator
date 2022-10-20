@@ -1,4 +1,4 @@
-from resonator_tools.circuit import notch_port
+from tools.circuit import notch_port
 # Need install resonator_tool package first 
 import scipy.io
 import matplotlib.pyplot as plt
@@ -12,11 +12,6 @@ from shutil import rmtree
 import matplotlib.gridspec as gridspec
 from scipy import stats
 from scipy.optimize import curve_fit as cf
-
-
-fdName = "Data" # Type folder name (which the mat file live in, and which is in the same dir with this py file)
-
-
 def get_myDelay( fdata, zdata ):
     edge_range = int(len(fdata)*0.1)
     end_point = int(len(fdata)*0.05)
@@ -83,36 +78,48 @@ def plot_Qi_sum(plot_dict):
     plt.savefig(fig_dir_sample+"/"+sample_name+".png")
     plt.close()
 
-sample_name = input("Input the sample name: ")
-result_folder = f"{fdName}/Results"
-result_folder_sample = result_folder+"/"+sample_name
-fig_dir_sample = result_folder+"/Figure/"+sample_name
-para_dir_sample = result_folder+"/fit_paras/"+sample_name
+fdName = "measuerment/withecco" # Type folder name (which the mat file live in, and which is in the same dir with this py file)
+# fdName = "measuerment/withoutecco"
+sample_name = "ITRI-Nb"
 
-goingon = 0
+result_folder = f"{fdName}/Results"
+# result_folder_sample = result_folder+"/"+sample_name
+# fig_dir_sample = result_folder+"/Figure/"+sample_name
+# para_dir_sample = result_folder+"/fit_paras/"+sample_name
+result_folder_sample = result_folder+"/"
+fig_dir_sample = result_folder+"/Figure/"
+para_dir_sample = result_folder+"/fit_paras/"
+droperror_sample = result_folder+"/droperror/"
+
+goingon = 1
 
 if not exists(result_folder):
     makedirs(result_folder)
     print("Results Directory created!")
 else:
     print("Results Directory Exist Keep going!")
-
+if not exists(droperror_sample):
+    makedirs(droperror_sample)
+    print("droperror_sample Directory create!")
+else:
+    print("droperror_sample Directory Exist Keep Going!")
 
 if not exists(result_folder_sample):
     makedirs(result_folder_sample)
     print("Results Directory for this sample created!")
-    goingon += 1
+    goingon = 1
 else:
-    cover = input("This sample has a record, overwrite it or not (y/n): ")
-    if cover.lower() == "y" or cover.lower() == "yes":
-        rmtree(result_folder_sample)
-        rmtree(fig_dir_sample)
-        rmtree(para_dir_sample)
-        makedirs(result_folder_sample)
-        print("Results Directory for this sample renew!")
-        goingon += 1
-    else:
-        print("Results for this sample Exist!")
+    print("Results for this sample Exist!")
+#     cover = input("This sample has a record, overwrite it or not (y/n): ")
+#     if cover.lower() == "y" or cover.lower() == "yes":
+#         rmtree(result_folder_sample)
+# #         rmtree(fig_dir_sample)
+# #         rmtree(para_dir_sample)
+#         makedirs(result_folder_sample)
+#         print("Results Directory for this sample renew!")
+#         goingon = 1
+#     else:
+#         print("Results for this sample Exist!")
 
 # create the sample folder in results directory
 if goingon == 1:
@@ -184,7 +191,7 @@ if goingon == 1:
             fr[dependencyName]=power
             
             rlist.append(fr)
-        #plt.show()
+        plt.show()
         dfResults = pd.DataFrame(rlist)
 
         # Change columns order
@@ -197,7 +204,13 @@ if goingon == 1:
         
         
         dfResults.to_csv(result_folder_sample+"/"+f"{outfn}_fitResult.csv", index=False)
-
+        
+        condi_1 = (dfResults["Qi_dia_corr_err"] / dfResults["Qi_dia_corr"] > 0.1)|(dfResults["Qi_dia_corr_err"] > 1e7)
+        condi_2 = (dfResults["absQc_err"] / dfResults["Qc_dia_corr"] > 0.1)
+        condi_3 = (dfResults["Ql_err"] / dfResults["Ql"] > 0.1)
+        indexNames = dfResults[(condi_1 | condi_2 | condi_3)].index
+        dfResults.drop(indexNames , inplace=True)
+        dfResults.to_csv(droperror_sample+"/"+f"{outfn}_fitResult.csv", index=False)
     file_dir = listdir(result_folder_sample)
 
     if not exists(fig_dir_sample):
@@ -232,6 +245,7 @@ if goingon == 1:
     else:
         print("para Directory Exist Keep Going!")
 
+        
     paras = {}
     for cav in sum_dict.keys():
         popt, pcov = cf(tan_loss,sum_dict[cav]["x"] ,1/sum_dict[cav]["y"],sigma=sum_dict[cav]["err"]**2)
