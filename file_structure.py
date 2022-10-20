@@ -1,8 +1,8 @@
 from os import listdir,makedirs
 from shutil import rmtree
 from os.path import isfile, join,exists
-
-
+import numpy as np
+from pandas import DataFrame
 def check_configure( sample_fdname, subfd_names ):
     rawdata_folder = f"{sample_fdname}/raw"
     result_folder = f"{sample_fdname}/results"
@@ -38,6 +38,50 @@ def check_file_extension( fd_name:str, file_ext:str ):
     """
     filename_list = []
     for f in listdir(fd_name):
-        if len(f.split(".")) == 2 and f.split(".")[1] == file_ext and isfile(join(fd_name, f)):
-            filename_list.append(f)
+        fullname = f.split(".")
+        extension = fullname[1]
+        name = fullname[0]
+        if len(fullname) == 2 and fullname[1] == file_ext and isfile(join(fd_name, f)):
+            filename_list.append(name)
+    
     return filename_list
+
+def check_subgroup( filename_list, delimiter='_' ):
+
+    sg_list = []
+    for fn in filename_list:
+        subgroup = fn.split("_")[0]
+        sg_list.append(subgroup)
+
+    subgroups, sg_counts = np.unique(sg_list, return_counts=True)
+    file_strcture = {}
+    # Init dict
+    for sg_name in subgroups:
+        file_strcture[sg_name] = []
+
+    for fn in filename_list:
+        subgroup = fn.split("_")[0]
+        subgroup_idx = np.where(subgroups == subgroup)
+        #file_idx = int(fn.split("_")[1])
+        #if file_idx < sg_counts[subgroup_idx]:
+        file_strcture[subgroup].append(fn)
+    return file_strcture
+
+def save_power_dep( df:DataFrame, output_name ):
+
+    newColOrder = list(df.columns)
+    # newColOrder.remove( "power" )
+    # newColOrder.insert(0, "power" )
+    # all_results = all_results[newColOrder]
+    #dictResult = dfResults.to_dict(orient="list")
+    #outfn = fn.replace(".mat","")
+        
+        
+    #df.to_csv(output_name, index=False)
+    
+    condi_1 = (df["Qi_dia_corr_err"] / df["Internal Q"] > 0.2) | (df["Internal Q"] < 0) #|(df["Qi_dia_corr_err"] < 1e8)
+    condi_2 = (df["absQc_err"] / df["Coupling Q"] > 0.2) | (df["Coupling Q"] < 0)
+    condi_3 = (df["Ql_err"] / df["Loaded Q"] > 0.2) | (df["Loaded Q"] < 0)
+    indexNames = df[(condi_1 | condi_2 | condi_3)].index 
+    df.drop(indexNames , inplace=True)
+    df.to_csv(output_name, index=False)  

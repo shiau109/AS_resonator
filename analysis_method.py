@@ -3,7 +3,7 @@ from electronic_delay import *
 import scipy.io
 import pandas as pd
 
-def mat_file_analysis( file_name, dependency_name:str, output_path ):
+def mat_file_analysis( file_name, dependency_name:str ):
 
     mat = scipy.io.loadmat( file_name ) 
     
@@ -36,7 +36,7 @@ def mat_file_analysis( file_name, dependency_name:str, output_path ):
             #myResonator.autofit()
             fit_results = myResonator.fitresults
             fit_results["delay"] = mydelay
-            fit_results["photons_num"] = myResonator.get_photons_in_resonator(dep_value-95)
+            fit_results["photons"] = myResonator.get_photons_in_resonator(dep_value-115)
 
             ## If you want to plot the raw data and fitting curve, use following code.  
             '''
@@ -63,24 +63,22 @@ def mat_file_analysis( file_name, dependency_name:str, output_path ):
         rlist.append(fit_results)
     #plt.show()
     all_results = pd.DataFrame(rlist)
+    all_results.rename(columns = {'Qi_dia_corr':'Internal Q'}, inplace = True)
+    all_results.rename(columns = {'Qc_dia_corr':'Coupling Q'}, inplace = True)
+    all_results.rename(columns = {'fr':'Resonant Frequency'}, inplace = True)
+    all_results.rename(columns = {'Ql':'Loaded Q'}, inplace = True)
 
     # Change columns order
-    newColOrder = list(all_results.columns)
-    newColOrder.remove(dependency_name)
-    newColOrder.insert(0,dependency_name)
-    all_results = all_results[newColOrder]
-    #dictResult = dfResults.to_dict(orient="list")
-    #outfn = fn.replace(".mat","")
-    outfn = file_name.replace(".mat","").split("/")[-1]
-        
-        
-    all_results.to_csv(f"{output_path}/{outfn}_fitresult.csv", index=False)
     
-    condi_1 = (all_results["Qi_dia_corr_err"] / all_results["Qi_dia_corr"] < 0.1)|(all_results["Qi_dia_corr_err"] < 1e8)|(all_results["Qi_dia_corr"] > 0)
-    condi_2 = (all_results["absQc_err"] / all_results["Qc_dia_corr"] < 0.1)|(all_results["Qc_dia_corr"] > 0)
-    condi_3 = (all_results["Ql_err"] / all_results["Ql"] < 0.1)|(all_results["Ql"] > 0)
-    indexNames = all_results[(condi_1 | condi_2 | condi_3)].index
     #all_results.drop(indexNames , inplace=True)
     #dfResults.to_csv(droperror_sample+"/"+f"{outfn}_fitResult.csv", index=False)
 
     return all_results
+
+def find_paras( file_name, colname, value ):
+
+    df = pd.read_csv( file_name )
+    searchedArr = df[[colname]].values
+    idx = (np.abs(searchedArr - value)).argmin()
+    #print( searchedArr[idx] )
+    return df.iloc[[idx]]
