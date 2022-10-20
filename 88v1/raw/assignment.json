@@ -47,12 +47,7 @@
         "color":"blue",
         "marker_style":"s"
     },
-    {
-        "measurement label":"C568779",
-        "center linewidth": 50,
-        "color":"brown",
-        "marker_style":"o"
-    },
+
     {
         "measurement label":"C576431",
         "center linewidth": 50,
@@ -65,4 +60,5 @@
         "color":"black",
         "marker_style":"o"
     }
+
 ]
