@@ -2,78 +2,110 @@ from resonator_tools.circuit import notch_port
 from electronic_delay import *
 import scipy.io
 import pandas as pd
-
-def mat_file_analysis( file_name, dependency_name:str ):
-
-    mat = scipy.io.loadmat( file_name ) 
-    
-    amp = mat["ZZA"].transpose()
-    pha = mat["ZZP"].transpose()
-    iqData = mat["ZZI"].transpose()+1j*mat["ZZQ"].transpose()
-    dependency = mat["x"][0] # Dependency
-    frequency = mat["y"][0]*1e9 # Freq (GHz)
-    xtitle = mat["xtitle"][0]
-    ytitle = mat["ytitle"][0]
+from scipy.optimize import curve_fit 
+import numpy as np
+import matplotlib.pyplot as plt
+def cavityQ_fit_dependency( freq:np.ndarray, s21:np.ndarray, power:np.ndarray=None ):
 
     # Fit part
-    rlist = []
-    fdata = {}
-    fdata["frequency"] = frequency
-    for xi in range(dependency.shape[-1]):
-        freq_fit = frequency
-        iq_fit = iqData[xi]
-        myResonator = notch_port()
-        myResonator.add_data(freq_fit,iq_fit)
-        
-        fr = {}
-        dep_value = dependency[xi]
-        mydelay = get_myDelay(freq_fit,iq_fit)
-        try:
-            
-            #delay, params =myResonator.get_delay(freq_fit,iq_fit)
-            
-            myResonator.autofit(electric_delay=mydelay)
-            #myResonator.autofit()
-            fit_results = myResonator.fitresults
-            fit_results["delay"] = mydelay
-            fit_results["photons"] = myResonator.get_photons_in_resonator(dep_value-115)
-
-            ## If you want to plot the raw data and fitting curve, use following code.  
-            '''
-            gs = gridspec.GridSpec(2, 2)
-            ax_amp = plt.subplot(gs[0,0])
-            ax_amp.plot(freq_fit,np.abs(iq_fit),label="raw")
-            ax_amp.plot(freq_fit,np.abs(myResonator.z_data_sim),label="fit")
-
-            ax_pha = plt.subplot(gs[1,0])
-            ax_pha.plot(freq_fit,np.angle(iq_fit),label="raw")
-            ax_pha.plot(freq_fit,np.angle(myResonator.z_data_sim),label="fit")
-
-            ax_iq = plt.subplot(gs[0:,1])
-            ax_iq.plot(iq_fit.real,iq_fit.imag,label="raw")
-            ax_iq.plot(myResonator.z_data_sim.real,myResonator.z_data_sim.imag,label="fit")
-
-            plt.show()
-            '''
-        except:
-            print(f"{file_name} {xi}th {dependency_name} {dep_value} Fit failed")
-            fr["delay"] = 0
-        fit_results[dependency_name]=dep_value
-        
-        rlist.append(fit_results)
-    #plt.show()
-    all_results = pd.DataFrame(rlist)
-    all_results.rename(columns = {'Qi_dia_corr':'Internal Q'}, inplace = True)
-    all_results.rename(columns = {'Qc_dia_corr':'Coupling Q'}, inplace = True)
-    all_results.rename(columns = {'fr':'Resonant Frequency'}, inplace = True)
-    all_results.rename(columns = {'Ql':'Loaded Q'}, inplace = True)
-
-    # Change columns order
+    fitParas = []
+    fitCurves = []
+    powerdep = False
+    if type(power) != type(None):
+        powerdep = True
+        print("power dependnet S21")
+    if s21.ndim == 1:
+        s21 = np.array([s21])
     
-    #all_results.drop(indexNames , inplace=True)
-    #dfResults.to_csv(droperror_sample+"/"+f"{outfn}_fitResult.csv", index=False)
+    for xi in range(s21.shape[0]):
+        freq_fit = freq
+        iq_fit = s21[xi]
+        myResonator = notch_port()        
+        
+        try:
+            # print("auto fitting")
+            #delay, params =myResonator.get_delay(freq_fit,iq_fit)
+            # myResonator.autofit(electric_delay=mydelay)
+            mydelay = get_myDelay( freq_fit, iq_fit ) 
 
-    return all_results
+            delay, amp_norm, alpha, fr, Ql, A2, frcal =\
+                    myResonator.do_calibration(freq_fit,iq_fit, fixed_delay=mydelay)
+            myResonator.z_data = myResonator.do_normalization(freq_fit,iq_fit,delay,amp_norm,alpha,A2,frcal)
+
+            myResonator.fitresults = myResonator.circlefit(freq_fit,myResonator.z_data,fr,Ql)
+            myResonator.z_data_sim = myResonator._S21_notch(
+                freq_fit,fr=myResonator.fitresults["fr"],
+                Ql=myResonator.fitresults["Ql"],
+                Qc=myResonator.fitresults["absQc"],
+                phi=myResonator.fitresults["phi0"],
+                a=amp_norm,alpha=alpha,delay=delay)
+            fit_results = myResonator.fitresults
+            fit_results["A"] = amp_norm
+            fit_results["alpha"] = alpha
+            fit_results["delay"] = delay
+
+            if powerdep:
+                fit_results["photons"] = myResonator.get_photons_in_resonator(power[xi])
+            fitCurves.append(myResonator.z_data_sim)
+            
+        except:
+            print(f"{xi} Fit failed")
+        
+        fitParas.append(fit_results)
+    df_fitParas = pd.DataFrame(fitParas)
+
+    
+    # Refined fitting
+    chi = df_fitParas["chi_square"].to_numpy()
+    weights = 1/chi**2
+    min_chi_idx = chi.argmin()
+    # print(df_fitParas["alpha"].to_numpy())
+    # print(np.unwrap( df_fitParas["alpha"].to_numpy(), period=np.pi))
+
+    fixed_delay = np.average(df_fitParas["delay"].to_numpy(), weights=weights)
+    fixed_amp = np.average(df_fitParas["A"].to_numpy(), weights=weights)
+    # fixed_alpha = np.average(np.unwrap( df_fitParas["alpha"].to_numpy(), period=np.pi), weights=weights)
+    
+    # fixed_delay = df_fitParas["delay"].to_numpy()[min_chi_idx]  
+    # fixed_amp = df_fitParas["A"].to_numpy()[min_chi_idx]  
+    # fixed_alpha = df_fitParas["alpha"].to_numpy()[min_chi_idx] 
+      
+    fitParas = []
+    fitCurves = []
+    for xi in range(s21.shape[0]):
+        freq_fit = freq
+        iq_fit = s21[xi]
+        myResonator = notch_port()        
+        try:
+            # print("2nd fitting")
+
+            delay, amp_norm, alpha, fr, Ql, A2, frcal =\
+                    myResonator.do_calibration(freq_fit,iq_fit,fixed_delay=fixed_delay)
+
+            myResonator.z_data = myResonator.do_normalization(freq_fit,iq_fit,fixed_delay,fixed_amp,alpha,A2,frcal)
+            myResonator.fitresults = myResonator.circlefit(freq_fit,myResonator.z_data,fr,Ql)
+            myResonator.z_data_sim = myResonator._S21_notch(
+                freq_fit,fr=myResonator.fitresults["fr"],
+                Ql=myResonator.fitresults["Ql"],
+                Qc=myResonator.fitresults["absQc"],
+                phi=myResonator.fitresults["phi0"],
+                a=fixed_amp,alpha=alpha,delay=fixed_delay)
+
+            fit_results = myResonator.fitresults
+            fit_results["A"] = fixed_amp
+            fit_results["alpha"] = alpha
+            fit_results["delay"] = fixed_delay
+            if powerdep:
+                fit_results["photons"] = myResonator.get_photons_in_resonator(power[xi])
+            fitCurves.append(myResonator.z_data_sim)
+            
+        except:
+            print(f"{xi} Fit failed")
+        
+        fitParas.append(fit_results)
+    df_fitParas = pd.DataFrame(fitParas)
+    
+    return df_fitParas, fitCurves
 
 def find_paras( file_name, colname, value ):
 
@@ -82,3 +114,36 @@ def find_paras( file_name, colname, value ):
     idx = (np.abs(searchedArr - value)).argmin()
     #print( searchedArr[idx] )
     return df.iloc[[idx]]
+
+def tan_loss(x,a,c,nc):
+    return (c+a/(1+(x/nc))**0.5)
+
+def fit_tanloss( n, loss, loss_err ):
+
+
+
+    upper_bound = [1,1,1e3]
+    lower_bound = [0,0,0]
+    
+    min_loss = np.amin(loss)
+    max_loss = np.amax(loss)
+
+    p0=[max_loss-min_loss,min_loss,1]
+    try:
+        popt, pcov = curve_fit(tan_loss, n, loss,sigma=loss_err**2, p0=p0, bounds=(lower_bound,upper_bound))
+        p_sigma = np.sqrt(np.diag(pcov))
+    except:
+        popt = [0,0,0]
+        p_sigma = [0,0,0]
+    results_dict = {
+        "A_TLS": [popt[0]],
+        "const": [popt[1]],
+        "nc": [popt[2]],
+        "A_TLS_err": [p_sigma[0]],
+        "const_err": [p_sigma[1]],
+        "nc_err": [p_sigma[2]],
+    }
+    results = pd.DataFrame(results_dict)
+
+    return results
+    #paras[cav]={"fr (GHz)":float(int(cav[1:])/10000),"TLS":popt[0],"Const.":popt[1],"Nc":popt[2]}

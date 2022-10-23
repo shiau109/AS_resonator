@@ -6,9 +6,6 @@ from pandas import DataFrame
 def check_configure( sample_fdname, subfd_names ):
     rawdata_folder = f"{sample_fdname}/raw"
     result_folder = f"{sample_fdname}/results"
-
-
-
     if not exists(result_folder):
         makedirs(result_folder)
         print("Create results Directory!")
@@ -79,9 +76,28 @@ def save_power_dep( df:DataFrame, output_name ):
         
     #df.to_csv(output_name, index=False)
     
-    condi_1 = (df["Qi_dia_corr_err"] / df["Internal Q"] > 0.2) | (df["Internal Q"] < 0) #|(df["Qi_dia_corr_err"] < 1e8)
-    condi_2 = (df["absQc_err"] / df["Coupling Q"] > 0.2) | (df["Coupling Q"] < 0)
-    condi_3 = (df["Ql_err"] / df["Loaded Q"] > 0.2) | (df["Loaded Q"] < 0)
+    condi_1 = (df["Qi_dia_corr_err"] / df["Qi_dia_corr"] > 0.2) | (df["Qi_dia_corr"] < 0) #|(df["Qi_dia_corr_err"] < 1e8)
+    condi_2 = (df["absQc_err"] / df["absQc"] > 0.2) | (df["absQc"] < 0)
+    condi_3 = (df["Ql_err"] / df["Ql"] > 0.2) | (df["Ql"] < 0)
     indexNames = df[(condi_1 | condi_2 | condi_3)].index 
     df.drop(indexNames , inplace=True)
+    df.to_csv(output_name, index=False)  
+
+def save_tanloss( df:DataFrame, output_name ):
+
+    newColOrder = list(df.columns)
+    # newColOrder.remove( "power" )
+    # newColOrder.insert(0, "power" )
+    # all_results = all_results[newColOrder]
+    #dictResult = dfResults.to_dict(orient="list")
+    #outfn = fn.replace(".mat","")
+        
+        
+    #df.to_csv(output_name, index=False)
+    
+    # condi_1 = (df["Qi_dia_corr_err"] / df["Internal Q"] > 0.2) | (df["Internal Q"] < 0) #|(df["Qi_dia_corr_err"] < 1e8)
+    # condi_2 = (df["absQc_err"] / df["Coupling Q"] > 0.2) | (df["Coupling Q"] < 0)
+    # condi_3 = (df["Ql_err"] / df["Loaded Q"] > 0.2) | (df["Loaded Q"] < 0)
+    # indexNames = df[(condi_1 | condi_2 | condi_3)].index 
+    # df.drop(indexNames , inplace=True)
     df.to_csv(output_name, index=False)  

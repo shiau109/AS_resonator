@@ -1,64 +1,75 @@
 [
     {
-        "measurement label":"C438977",
-        "center linewidth": 2,
+        "measurement_label":"C438977",
+        "center_linewidth": 2,
         "color":"red",
         "marker_style":"o"
     },
     {
-        "measurement label":"C446238",
-        "center linewidth": 2,
+        "measurement_label":"C446238",
+        "center_linewidth": 2,
         "color":"red",
         "marker_style":"s"
     },
     {
-        "measurement label":"C481325",
-        "center linewidth": 5,
+        "measurement_label":"C481325",
+        "center_linewidth": 5,
         "color":"gold",
         "marker_style":"o"
     },
     {
-        "measurement label":"C489782",
-        "center linewidth": 5,
+        "measurement_label":"C489782",
+        "center_linewidth": 5,
         "color":"gold",
         "marker_style":"s"
     },
     {
-        "measurement label":"C510546",
-        "center linewidth": 10,
+        "measurement_label":"C510546",
+        "center_linewidth": 10,
         "color":"green",
         "marker_style":"o"
     },
     {
-        "measurement label":"C519099",
-        "center linewidth": 10,
+        "measurement_label":"C519099",
+        "center_linewidth": 10,
         "color":"green",
         "marker_style":"s"
     },
     {
-        "measurement label":"C535973",
-        "center linewidth": 20,
+        "measurement_label":"C535973",
+        "center_linewidth": 20,
         "color":"blue",
         "marker_style":"o"
     },
     {
-        "measurement label":"C544795",
-        "center linewidth": 20,
+        "measurement_label":"C544795",
+        "center_linewidth": 20,
         "color":"blue",
         "marker_style":"s"
     },
-
     {
-        "measurement label":"C576431",
-        "center linewidth": 50,
+        "measurement_label":"C568779",
+        "center_linewidth": "Nan",
+        "color":"brown",
+        "marker_style":"o"
+    },
+    {
+        "measurement_label":"C576431",
+        "center_linewidth": 50,
         "color":"brown",
         "marker_style":"s"
     },
     {
-        "measurement label":"C576665",
-        "center linewidth": 100,
+        "measurement_label":"C576665",
+        "center_linewidth": 100,
         "color":"black",
         "marker_style":"o"
+    },
+    {
+        "measurement_label":"C584854",
+        "center_linewidth": "Nan",
+        "color":"black",
+        "marker_style":"s"
     }
 
 ]
