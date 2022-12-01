@@ -19,11 +19,11 @@ def gate_fidelity_decay(x, A, p, B):
 
 def fit_gate_fidelity( seq_lens, signal ):
     
-    fidelity_ave = np.mean(signal, axis=0) 
-    upper_bound = [1e2,1,1e2]
-    lower_bound = [-1e2,0,-1e2]
+
+    upper_bound = [1e3,1,1e3]
+    lower_bound = [-1e3,0,-1e3]
     try:
-        popt, pcov = curve_fit(gate_fidelity_decay, seq_lens, fidelity_ave, bounds=(lower_bound,upper_bound))
+        popt, pcov = curve_fit(gate_fidelity_decay, seq_lens, signal, bounds=(lower_bound,upper_bound))
         p_sigma = np.sqrt(np.diag(pcov))
     except:
         popt = [0,0,0]
@@ -40,12 +40,16 @@ def fit_gate_fidelity( seq_lens, signal ):
 
     return results
 
-check_file_extension("testing/","mat")
-x, y, iqdata = mat_to_numpy("testing/2DRB_2.mat")
-print(x, y)
-signal = np.angle(iqdata)
+filname = "6860_RB_100_33"
+x, y, iqdata = mat_to_numpy(f"testing/{filname}.mat")
+iqdata = iqdata.transpose()
+print(x.shape, y.shape, iqdata.shape)
+signal = (np.angle(iqdata)-np.angle(iqdata[0])).transpose()
 
-fit_result = fit_gate_fidelity( x, signal )
+signal_ave = np.mean(signal, axis=0) 
+print(signal_ave.shape)
+
+fit_result = fit_gate_fidelity( x, signal_ave )
 print(fit_result)
 e_clf = (1-fit_result["p"].to_numpy()[0])/2
 e_xyg = e_clf/1.875
@@ -95,22 +99,28 @@ default_plot_style = {
 raw_style = default_plot_style
 raw_style["marker_size"] = 1
 raw_style["legend_label"] = "raw"
-plot_basic2D(plot_df_raw, axObj=axObj, plot_style = raw_style)
+plot_basic(plot_df_raw, axObj=axObj, plot_style = raw_style)
 
 ave_style = default_plot_style
 ave_style["marker_size"] = 5
 ave_style["legend_label"] = "ave"
-plot_basic2D(plot_df_raw_ave, axObj=axObj, plot_style = ave_style)
+plot_basic(plot_df_raw_ave, axObj=axObj, plot_style = ave_style)
 
 fit_style = default_plot_style
 fit_style["marker_style"] = "-"
 fit_style["legend_label"] = "fit"
-plot_basic2D(plot_df_fit, axObj=axObj, plot_style = fit_style)
+plot_basic(plot_df_fit, axObj=axObj, plot_style = fit_style)
 
 axObj.legend()
-
+axObj.text(0.5, 0.95, f"{filname}", fontsize=10, transform=axObj.transAxes)
 axObj.text(0.5, 0.9, f"Random times {y.shape[0]}", fontsize=10, transform=axObj.transAxes)
 axObj.text(0.5, 0.85, f"{r'$r_{Clifford}$='}{e_clf:e}", fontsize=10, transform=axObj.transAxes)
 axObj.text(0.5, 0.8, f"{r'$r_{gate}$='}{e_xyg:e}", fontsize=10, transform=axObj.transAxes)
+full_path = f"{filname}_fitcurve.png"
+print(f"Saving plot at {full_path}")
+plt.savefig(f"{full_path}")
 
+plot_basic(plot_df_fit, plot_style = raw_style)
+
+plt.close()
 plt.show()

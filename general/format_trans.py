@@ -1,12 +1,17 @@
 import scipy.io
 import pandas as pd
+import numpy as np
 
 def mat_to_numpy( file_name ):
 
     mat = scipy.io.loadmat( file_name )   
     # amp = mat["ZZA"].transpose()
     # pha = mat["ZZP"].transpose()
-    s21 = mat["ZZI"]+1j*mat["ZZQ"]
+    try:
+        s21 = mat["ZZI"]+1j*mat["ZZQ"]
+    except:
+        s21 = mat["ZZA"]*np.exp(1j*mat["ZZP"])
+    
     x = mat["x"]
     if x.shape[0] == 1:
         x = x[0] # Dependency

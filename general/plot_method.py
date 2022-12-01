@@ -1,13 +1,11 @@
-from email.policy import default
-from sqlite3 import DatabaseError
-from xml.sax import default_parser_list
+
 from matplotlib import pyplot as plt
 import pandas as pd
 from typing import List, Tuple
 from matplotlib.gridspec import GridSpec
 import numpy as np
 from .analysis_method import *
-
+import copy
 default_plot_style = {
     "marker_style":"o",
     "marker_size":1,
@@ -24,6 +22,7 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
     fig = plt.figure(facecolor='white',figsize=(20,9))
 
     gs = GridSpec(2, 2)
+    
     ax_amp = plt.subplot(gs[0,0])
     ax_amp.set_xlabel("Frequency")
     ax_amp.set_ylabel("|S21|")
@@ -33,7 +32,7 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
     ax_iq = plt.subplot(gs[0:,1])
     ax_iq.set_xlabel("S21.real")
     ax_iq.set_ylabel("S21.imag")
-
+    ax_iq.set_title(title)
     plot_style = default_plot_style
 
     color = plt.cm.rainbow(np.linspace(0, 1, dependency.shape[-1]))
@@ -48,13 +47,13 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
         plot_rawdata["y"] = np.abs(rawdata)
         plot_style["marker_style"] = "o"
         
-        ax_amp = plot_basic2D( plot_rawdata, plot_style, ax_amp )
+        ax_amp = plot_basic( plot_rawdata, plot_style, ax_amp )
 
         plot_fitcurve = pd.DataFrame()
         plot_fitcurve["x"] = freq
         plot_fitcurve["y"] = np.abs(fitcurve)
         plot_style["marker_style"] = "-"
-        ax_amp = plot_basic2D( plot_fitcurve, plot_style, ax_amp )
+        ax_amp = plot_basic( plot_fitcurve, plot_style, ax_amp )
 
 
         # plot phase subplot
@@ -62,27 +61,27 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
         plot_rawdata["x"] = freq
         plot_rawdata["y"] = np.unwrap(np.angle(rawdata))
         plot_style["marker_style"] = "o"
-        ax_pha = plot_basic2D( plot_rawdata, plot_style, ax_pha )
+        ax_pha = plot_basic( plot_rawdata, plot_style, ax_pha )
 
         plot_fitcurve = pd.DataFrame()
         plot_fitcurve["x"] = freq
         plot_fitcurve["y"] = np.unwrap(np.angle(fitcurve))
         plot_style["marker_style"] = "-"
-        ax_pha = plot_basic2D( plot_fitcurve, plot_style, ax_pha )
+        ax_pha = plot_basic( plot_fitcurve, plot_style, ax_pha )
 
         # plot IQ subplot
         plot_rawdata = pd.DataFrame()
         plot_rawdata["x"] = rawdata.real
         plot_rawdata["y"] = rawdata.imag
         plot_style["marker_style"] = "o"
-        ax_iq = plot_basic2D( plot_rawdata, plot_style, ax_iq )
+        ax_iq = plot_basic( plot_rawdata, plot_style, ax_iq )
 
         plot_fitcurve = pd.DataFrame()
         plot_fitcurve["x"] = fitcurve.real
         plot_fitcurve["y"] = fitcurve.imag
         plot_style["marker_style"] = "-"
         plot_style["legend_label"] =f"{dep}"
-        ax_iq = plot_basic2D( plot_fitcurve, plot_style, ax_iq )
+        ax_iq = plot_basic( plot_fitcurve, plot_style, ax_iq )
     ax_amp.legend()
     ax_pha.legend()
     ax_iq.legend()
@@ -118,7 +117,7 @@ def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=
     # Prepare plot style format
     plot_style = default_plot_style
     plot_style["marker_style"] = "o"
-    plot_basic2D( powdep_loss, plot_style, axObj)
+    plot_basic( powdep_loss, plot_style, axObj)
     # Fitting curve
     # Prepare plot data format
     powdep_loss_fit = pd.DataFrame()
@@ -128,7 +127,7 @@ def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=
     # Prepare plot style format
     plot_style = default_plot_style
     plot_style["marker_style"] = "-"
-    plot_basic2D( powdep_loss_fit, plot_style, axObj )
+    plot_basic( powdep_loss_fit, plot_style, axObj )
 
     axObj.set_xlabel("Photon Number")
     axObj.set_ylabel("Loss")
@@ -144,19 +143,24 @@ def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=
 
 
 # Basic ploting
-def plot_basic2D( data:pd.DataFrame, plot_style:dict=default_plot_style, axObj=None, output=None):
+def plot_basic( data:pd.DataFrame, plot_style:dict=default_plot_style, axObj=None, output=None):
     """
 
 
     output : str output path and name
 
     """
+    temp_ps = copy.deepcopy(default_plot_style)
+    temp_ps.update(plot_style)
+    plot_style = temp_ps
     mk_style = plot_style["marker_style"]
     mk_size = plot_style["marker_size"]
     mk_color = plot_style["marker_color"]
     leg_label = plot_style["legend_label"]
-
-    if axObj ==None :
+    show_plot = False
+    if axObj == None :
+        print("No axObj")
+        show_plot = True
         fig = plt.figure(figsize=(16,9),facecolor='white')
         axObj = fig.add_subplot()
         # axObj.set_title(plot_style["title"])
@@ -173,7 +177,8 @@ def plot_basic2D( data:pd.DataFrame, plot_style:dict=default_plot_style, axObj=N
     else:
         yerr = None
     axObj.errorbar( x, y, yerr=yerr, fmt=mk_style, ms=mk_size, c=mk_color, label=leg_label )
-    if axObj == None:
+    if show_plot:
+        print("Plot!!")
         plt.show()
     if output != None:
         plt.savefig(f"{output}.png")

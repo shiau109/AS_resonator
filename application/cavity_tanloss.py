@@ -1,16 +1,14 @@
-
 import sys
 sys.path.append(r'c:\\Users\\shiau\\AS_resonator')
-print(sys.path)
 
 from general.file_structure import *
 from general.analysis_method import *
 from general.plot_method import *
 from general.format_trans import *
 
-sample_name = "88v1"
-project_folder = r"C:\Users\shiau\AS_resonator" # empty string "" for relative path 
-attenuation = 115
+sample_name = "TSRI_Ta_CPW_1"
+project_folder = r"Z:\data\cavity" # empty string "" for relative path 
+attenuation = 111
 # check_configure(sample_name, ["power", "tan_loss", "clw"])
 raw_data_fd = f"{project_folder}/{sample_name}/raw"
 result_folder = f"{project_folder}/{sample_name}/results"
@@ -31,9 +29,10 @@ for cl, flist in file_struc.items():
 
     for fn in flist:
         input_power, freq, s21 = mat_to_numpy(f"{raw_data_fd}/{fn}.mat")
+        s21 = s21.transpose()
         freq *=1e9
         power_mk = input_power-attenuation
-        part_result, fitCurves = cavityQ_fit_dependency(freq, s21.transpose(), power=power_mk)
+        part_result, fitCurves = cavityQ_fit_dependency(freq, s21, power=power_mk)
         powerQ_results.append( part_result )
         part_raw_dfs = mat_to_df( f"{raw_data_fd}/{fn}.mat" )
         raw_dfs.extend(part_raw_dfs)
@@ -52,7 +51,7 @@ for cl, flist in file_struc.items():
         ("photons","Qc_dia_corr","absQc_err","Coupling Q"),
         ("photons","Ql","Ql_err","Loaded Q")]
     # Save plot result
-    plot_df(powerQ_result, plot_info, log_scale=(True,True), title=("","Photons","Quality factor"), output=f"{power_dep_folder}/{cl}" )
+    plot_df(powerQ_result, plot_info, log_scale=(True,True), title=(cl,"Photons","Quality factor"), output=f"{power_dep_folder}/{cl}" )
 
     # Fit loss model
     powerQ_result = pd.read_csv( f"{power_dep_folder}/{cl}.csv" )
