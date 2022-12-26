@@ -14,13 +14,13 @@ def mat_to_numpy( file_name ):
     
     x = mat["x"]
     if x.shape[0] == 1:
-        x = x[0] # Dependency
+        x = x[0] 
     else:
         x = x.transpose()[0]
     
     y = mat["y"]
     if y.shape[0] == 1:
-        y = y[0] # Freq (Hz)
+        y = y[0] 
     else:
         y = y.transpose()[0]
     xtitle = mat["xtitle"][0]

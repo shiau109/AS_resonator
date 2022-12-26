@@ -20,8 +20,8 @@ def gate_fidelity_decay(x, A, p, B):
 def fit_gate_fidelity( seq_lens, signal ):
     
 
-    upper_bound = [1e3,1,1e3]
-    lower_bound = [-1e3,0,-1e3]
+    upper_bound = [1e8,1,1e8]
+    lower_bound = [-1e8,0,-1e8]
     try:
         popt, pcov = curve_fit(gate_fidelity_decay, seq_lens, signal, bounds=(lower_bound,upper_bound))
         p_sigma = np.sqrt(np.diag(pcov))
@@ -40,13 +40,19 @@ def fit_gate_fidelity( seq_lens, signal ):
 
     return results
 
-filname = "6860_RB_100_33"
+filname = "6404_RB200_r50"
 x, y, iqdata = mat_to_numpy(f"testing/{filname}.mat")
 iqdata = iqdata.transpose()
 print(x.shape, y.shape, iqdata.shape)
-signal = (np.angle(iqdata)-np.angle(iqdata[0])).transpose()
+# signal = (np.angle(iqdata)).transpose()
+signal = iqdata.transpose()
 
-signal_ave = np.mean(signal, axis=0) 
+signal_ave_raw = np.mean(signal, axis=0) 
+shift_o = np.mean(signal_ave_raw)
+r_angle = np.exp(1j*np.pi*0.25)
+signal_ave_c = (signal_ave_raw-shift_o)*r_angle
+signal_ave = signal_ave_c.real*1000
+signal = ((signal-shift_o)*r_angle).real*1000
 print(signal_ave.shape)
 
 fit_result = fit_gate_fidelity( x, signal_ave )
@@ -81,10 +87,17 @@ plot_data_fit = {
 plot_df_fit = pd.DataFrame(plot_data_fit)
 
 fig = plt.figure(facecolor='white')
+plt.rc('font', size=20)  
+plt.subplots_adjust(left=0.15,
+                    bottom=0.15, 
+                    right=0.9, 
+                    top=0.9, 
+                    wspace=0.25, 
+                    hspace=0.25)
 axObj = fig.add_subplot()
 axObj.set_title("Randomized Banchmarking")
 axObj.set_xlabel("Number of Gate")
-axObj.set_ylabel("Phase")
+axObj.set_ylabel("Voltage signal (mV)")
 
 default_plot_style = {
     "marker_style":"o",
@@ -112,15 +125,16 @@ fit_style["legend_label"] = "fit"
 plot_basic(plot_df_fit, axObj=axObj, plot_style = fit_style)
 
 axObj.legend()
-axObj.text(0.5, 0.95, f"{filname}", fontsize=10, transform=axObj.transAxes)
-axObj.text(0.5, 0.9, f"Random times {y.shape[0]}", fontsize=10, transform=axObj.transAxes)
-axObj.text(0.5, 0.85, f"{r'$r_{Clifford}$='}{e_clf:e}", fontsize=10, transform=axObj.transAxes)
-axObj.text(0.5, 0.8, f"{r'$r_{gate}$='}{e_xyg:e}", fontsize=10, transform=axObj.transAxes)
+# axObj.text(0.5, 0.95, f"{filname}", fontsize=20, transform=axObj.transAxes)
+# axObj.text(0.45, 0.9, f"Random times {y.shape[0]}", fontsize=20, transform=axObj.transAxes)
+axObj.text(0.40, 0.88, f"{r'$r_{Clifford}$='}{e_clf*100:.2f}%", fontsize=20, transform=axObj.transAxes)
+axObj.text(0.40, 0.8, f"{r'$r_{gate}$='}{e_xyg*100:.2f}%", fontsize=20, transform=axObj.transAxes)
 full_path = f"{filname}_fitcurve.png"
-print(f"Saving plot at {full_path}")
-plt.savefig(f"{full_path}")
+# print(f"Saving plot at {full_path}")
+# plt.savefig(f"{full_path}")
 
-plot_basic(plot_df_fit, plot_style = raw_style)
+# plot_basic(plot_df_fit, plot_style = raw_style)
 
-plt.close()
+
+# plt.plot(signal_ave_c.real, signal_ave_c.imag,"o")
 plt.show()

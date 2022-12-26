@@ -22,7 +22,7 @@ def check_configure( sample_fdname, subfd_names ):
             if cover.lower() == "y" or cover.lower() == "yes":
                 rmtree(subfd)
                 makedirs(subfd)
-                print(f"Subfolder {subfd}  this sample renew!")
+                print(f"Subfolder {subfd} is initialized!")
             else:
                 print(f"Results for this sample Exist!")
 
@@ -63,6 +63,8 @@ def check_subgroup( filename_list, delimiter='_' ):
         #if file_idx < sg_counts[subgroup_idx]:
         file_strcture[subgroup].append(fn)
     return file_strcture
+
+
 
 def save_power_dep( df:DataFrame, output_name ):
 

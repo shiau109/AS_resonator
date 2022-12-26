@@ -107,7 +107,7 @@ def cavityQ_fit_dependency( freq:np.ndarray, s21:np.ndarray, power:np.ndarray=No
     
     return df_fitParas, fitCurves
 
-def find_paras( file_name, colname, value ):
+def find_row( file_name, colname, value ):
 
     df = pd.read_csv( file_name )
     searchedArr = df[[colname]].values
@@ -125,7 +125,7 @@ def fit_tanloss( n, loss, loss_err ):
     min_loss = np.amin(loss)
     max_loss = np.amax(loss)
 
-    p0=[max_loss-min_loss,min_loss,1]
+    p0=[max_loss-min_loss,min_loss,0.1]
     try:
         popt, pcov = curve_fit(tan_loss, n, loss,sigma=loss_err**2, p0=p0, bounds=(lower_bound,upper_bound))
         p_sigma = np.sqrt(np.diag(pcov))

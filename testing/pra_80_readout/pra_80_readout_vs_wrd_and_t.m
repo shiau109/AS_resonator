@@ -25,8 +25,8 @@ delta_ar = wa-wr;
 chi_01 = (g.^2./delta_ar);
 chi = -chi_01*( Ec./(delta_ar-Ec) );
 
-gamma = 1.6e-4* 2*pi;%[GHz]
-gamma_phi = 0 * 2*pi;%[GHz]
+gamma = 0.0001e-4* 2*pi;%[GHz]
+gamma_phi = 16e-4 * 2*pi;%[GHz]
 kappa = 0.00006 * 2*pi;%[GHz]
 
 disp( "\kappa/(2*\chi)" );
@@ -35,7 +35,7 @@ disp( kappa/(2*chi) );
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 wad = wa ;
-wrd_list = wr - chi*linspace(-3,3,100);%[GHz]
+wrd_list = wr - chi*linspace(-5,5,100);%[GHz]
 
 I_signal_vs_drm = [];
 Q_signal_vs_drm = [];
@@ -53,7 +53,7 @@ for mm = 1:length(wrd_list)
     ti_rd = tf_ad;%[ns]
     tf_rd = Inf;%Inf[ns]
 
-    tspan = [0 5000];%[ns]
+    tspan = [0 8000];%[ns]
     tq = linspace(tspan(1), tspan(end), 1000);
     X0 = 0;
     Y0 = 0;

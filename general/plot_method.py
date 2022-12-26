@@ -20,20 +20,43 @@ default_plot_style = {
 def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, dependency:np.array, title=None, output_fd=None):
     
     fig = plt.figure(facecolor='white',figsize=(20,9))
-
+    fig.tight_layout()
+    faxmin = freq.min()
+    faxmax = freq.max()
+    faxmid = (faxmin+faxmax)/2
+    faxdf = faxmax-faxmin
+    t = [ faxmid-faxdf/2.5, faxmid, faxmid+faxdf/2.5]
+     
     gs = GridSpec(2, 2)
     
     ax_amp = plt.subplot(gs[0,0])
-    ax_amp.set_xlabel("Frequency")
-    ax_amp.set_ylabel("|S21|")
+    # ax_amp.set_xlabel("Frequency (GHz)")
+    ax_amp.set_ylabel("Ampltude")
+    # ax_amp.xaxis.set_major_locator(plt.MaxNLocator(2))
+    ax_amp.locator_params(tight=True)
+    ax_amp.set_xticks(t)
+
     ax_pha = plt.subplot(gs[1,0])
-    ax_pha.set_xlabel("Frequency")
-    ax_pha.set_ylabel("S21.angle")
+    ax_pha.set_xlabel("Frequency (GHz)")
+    ax_pha.set_ylabel("Phase (rad)")
+    ax_pha.locator_params(tight=True)
+    ax_pha.set_xticks(t)
+
     ax_iq = plt.subplot(gs[0:,1])
-    ax_iq.set_xlabel("S21.real")
-    ax_iq.set_ylabel("S21.imag")
+    ax_iq.set_xlabel("In-phase")
+    ax_iq.set_ylabel("Quadrature")
     ax_iq.set_title(title)
-    plot_style = default_plot_style
+    ax_iq.locator_params(tight=True)
+
+    ax_iq.xaxis.set_major_locator(plt.MaxNLocator(5))
+    ax_iq.yaxis.set_major_locator(plt.MaxNLocator(5))
+    plt.subplots_adjust(left=0.15,
+                        bottom=0.15, 
+                        right=0.9, 
+                        top=0.9, 
+                        wspace=0.25, 
+                        hspace=0.25)
+    plot_style = {}
 
     color = plt.cm.rainbow(np.linspace(0, 1, dependency.shape[-1]))
 
@@ -82,8 +105,8 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
         plot_style["marker_style"] = "-"
         plot_style["legend_label"] =f"{dep}"
         ax_iq = plot_basic( plot_fitcurve, plot_style, ax_iq )
-    ax_amp.legend()
-    ax_pha.legend()
+    # ax_amp.legend()
+    # ax_pha.legend()
     ax_iq.legend()
     if output_fd != None :
         full_path = f"{output_fd}/{title}_fitcurve.png"
@@ -115,7 +138,7 @@ def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=
     powdep_loss["y"] = loss
     powdep_loss["yerr"] = loss_err
     # Prepare plot style format
-    plot_style = default_plot_style
+    plot_style = {}
     plot_style["marker_style"] = "o"
     plot_basic( powdep_loss, plot_style, axObj)
     # Fitting curve
@@ -125,7 +148,7 @@ def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=
     powdep_loss_fit["x"] = fit_n
     powdep_loss_fit["y"] = tan_loss(fit_n, tanloss_result["A_TLS"].values, tanloss_result["const"].values, tanloss_result["nc"].values)
     # Prepare plot style format
-    plot_style = default_plot_style
+    plot_style = {}
     plot_style["marker_style"] = "-"
     plot_basic( powdep_loss_fit, plot_style, axObj )
 
@@ -139,16 +162,85 @@ def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=
     else:
         plt.show()
 
+def plot_power_dependent_Q( powerQ_result, cav_label=None, output_fd=None ):
+    
+    plot_style = {}
+    plot_style["marker_size"] = 5
+
+    fig = plt.figure(facecolor='white')
+    plt.subplots_adjust(left=0.15,
+                        bottom=0.15, 
+                        right=0.9, 
+                        top=0.9, 
+                        wspace=0.25, 
+                        hspace=0.25)
+    axObj = fig.add_subplot()
+
+    xy_cols = [("photons","Qi_dia_corr","Qi_dia_corr_err"),
+        ("photons","Qc_dia_corr","absQc_err"),
+        ("photons","Ql","Ql_err")]
+    plot_list = assemble_plot_df( powerQ_result, xy_cols )
+    labels = ["Internal Q","Coupling Q", "loaded Q"]
+    for i, p in enumerate(plot_list):
+        plot_style["legend_label"] = labels[i]
+        plot_basic(p, plot_style=plot_style, axObj=axObj)
+
+    axObj.set_xlabel("Photons")
+    axObj.set_ylabel("Quality factor")
+    axObj.set_xscale("log")
+    axObj.set_yscale("log")
+    axObj.set_title(cav_label)
+    axObj.legend()
+    if output_fd != None :
+        plt.savefig(f"{output_fd}/{cav_label}_fitcurve.png")
+        plt.close()
+    else:
+        plt.show()
+
+def assemble_plot_df( data:pd.DataFrame, xy_cols:List ):
+    """
+    Transform a dataframe to the format for plotting
+    """
+
+    plot_dfs = []
+    for xy_col in xy_cols:
+        
+        x_col = xy_col[0]
+        y_col = xy_col[1]
+
+        plot_df = pd.DataFrame()
+        x = data[x_col].to_numpy()
+        plot_df["x"] = x
+
+        y = data[y_col].to_numpy()
+        plot_df["y"] = y
+        
+        if len(xy_col)==3:
+            yerr_col = xy_col[2]
+            if yerr_col != None:
+                yerr = data[yerr_col].to_numpy()
+                plot_df["yerr"] = yerr
+
+        plot_dfs.append(plot_df)
+
+    return plot_dfs
 
 
 
 # Basic ploting
 def plot_basic( data:pd.DataFrame, plot_style:dict=default_plot_style, axObj=None, output=None):
     """
-
-
     output : str output path and name
-
+    default_plot_style = {
+        "marker_style":"o",
+        "marker_size":1,
+        "marker_color":None,
+        "legend_label":None,
+        "xlabel":None,
+        "ylabel":None,
+        "xscale":"linear",
+        "yscale":"linear"
+    }
     """
     temp_ps = copy.deepcopy(default_plot_style)
     temp_ps.update(plot_style)
