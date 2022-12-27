@@ -11,6 +11,7 @@ sample_name = "TSRI_Ta_CPW_1"
 project_folder = r"Z:\data\resonator" # empty string "" for relative path 
 attenuation = 111
 
+VNA_minpower = -60
 # 1.1 File structure setting
 check_configure(sample_name, ["power", "tan_loss", "clw"])
 raw_data_fd = f"{project_folder}/{sample_name}/raw"
@@ -35,6 +36,12 @@ for cav_label, flist in subgroup_struc.items():
         input_power, freq, s21 = mat_to_numpy(f"{raw_data_fd}/{fn}.mat")
         s21 = s21.transpose()
         freq *=1e9
+        seleted_power = []
+        for p in input_power.tolist():
+            if p < VNA_minpower:
+                seleted_power.append(p)
+            else:
+                seleted_power.append(VNA_minpower)
         power_mk = input_power-attenuation
         part_result, fitCurves = cavityQ_fit_dependency(freq, s21, power=power_mk)
         powerQ_results.append( part_result )
