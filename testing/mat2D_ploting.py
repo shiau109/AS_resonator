@@ -9,26 +9,27 @@ from general.analysis_method import *
 from general.plot_method import *
 from general.format_trans import *
 
-
-x, y, iqdata_1 = mat_to_numpy("testing/2Q_swap/5576_Q2SWAP.mat")
-# x, y, iqdata_g = mat_to_numpy("testing/JPA67_fp1110_25.mat")
+file_name = r"C:\Users\shiau\Downloads\7394_6000M_134uA.mat"
+x, y, iqdata_1 = mat_to_numpy( file_name )
+iqdata_1 = scipy.io.loadmat( file_name )
 xyrotate = False
-
-signal = np.angle(iqdata_1)
+# x = x*1000.
+signal = iqdata_1["ZZA"]
 mx,my=np.meshgrid(x,y)
-
+vmax = 5
+vmin = -10
 plt.figure(figsize=(16, 10))
 
 plt.rc('font', size=20)          # controls default text sizes
 
-plt.ylabel("Z1 Voltage (V)")
-plt.xlabel("Swap time (ns)")
+plt.xlabel("Pumping Frequency (GHz)")
+plt.ylabel("Pumping Power (dBm)")
 
 if xyrotate == True:
-    plt.pcolormesh(my,mx,signal)
+    plt.pcolormesh(my,mx,signal, vmin=vmin, vmax=vmax)
 else:
-    plt.pcolormesh(mx,my,signal)
-# plt.colorbar()
+    plt.pcolormesh(mx,my,signal, vmin=vmin, vmax=vmax)
+plt.colorbar()
 plt.MaxNLocator(3)
 
 plt.subplots_adjust(left=0.25,

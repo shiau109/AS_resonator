@@ -7,17 +7,18 @@ from general.plot_method import *
 from general.format_trans import *
 
 # 1. Sample path setting
-sample_name = "TSRI_Ta_CPW_1"
+sample_name = "ITRI_Nb_RD_152"
 project_folder = r"Z:\data\resonator" # empty string "" for relative path 
-attenuation = 111
+attenuation = 93
 
 VNA_minpower = -60
 # 1.1 File structure setting
-check_configure(sample_name, ["power", "tan_loss", "clw"])
-raw_data_fd = f"{project_folder}/{sample_name}/raw"
+sample_root = f"{project_folder}/{sample_name}"
+raw_data_fd = f"{sample_root}/raw"
 result_folder = f"{project_folder}/{sample_name}/results"
 power_dep_folder = f"{result_folder}/power"
 tanloss_folder = f"{result_folder}/tan_loss"
+check_configure(f"{sample_root}", ["power", "tan_loss", "clw"])
 
 # 1.2 Find cavity data (mat file) in the folder "raw_data_fd"
 mat_files = check_file_extension( raw_data_fd, "mat")
@@ -53,7 +54,7 @@ for cav_label, flist in subgroup_struc.items():
     powerQ_result.Name = cav_label
 
     # plot_fitdata(raw_dfs)
-
+"""
 
     ## Save result
     save_power_dep(powerQ_result, f"{power_dep_folder}/{cav_label}.csv")
@@ -165,3 +166,4 @@ for i, p in enumerate(plot_list):
 # plot_df(sample_statistic, ("center_linewidth","A_TLS","A_TLS_err",None), log_scale=(True,True), title=("","Center Linewidth (um)","TLS Loss"), output=f"{result_folder}/clw/A_TLS")
 # plot_df(sample_statistic, ("center_linewidth","const","const_err",None), log_scale=(True,True), title=("","Center Linewidth (um))","Const Loss"), output=f"{result_folder}/clw/const" )
 # plot_df(sample_statistic, ("center_linewidth","nc","nc_err",None), log_scale=(True,True), title=("","Center Linewidth (um)","nc"), output=f"{result_folder}/clw/nc" )
+"""

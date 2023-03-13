@@ -119,7 +119,7 @@ def tan_loss(x,a,c,nc):
     return (c+a/(1+(x/nc))**0.5)
 
 def fit_tanloss( n, loss, loss_err ):
-    upper_bound = [1,1,1e3]
+    upper_bound = [1,1,1e4]
     lower_bound = [0,0,0]
     
     min_loss = np.amin(loss)
