@@ -1,10 +1,10 @@
 import sys
 sys.path.append(r'c:\\Users\\shiau\\AS_resonator')
 
-from general.file_structure import *
-from general.analysis_method import *
-from general.plot_method import *
-from general.format_trans import *
+from analysis.file_structure import *
+from analysis.analysis_method import *
+from analysis.plot_method import *
+from analysis.format_trans import *
 
 # 1. Sample path setting
 sample_name = "88v1"

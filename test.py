@@ -2,4 +2,4 @@
 import sys
 print(sys.path)
 
-import general.analysis_method
+import analysis.analysis_method

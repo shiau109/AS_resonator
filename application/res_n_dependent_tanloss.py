@@ -1,15 +1,15 @@
 import sys
 sys.path.append(r'c:\\Users\\shiau\\AS_resonator')
 
-from general.file_structure import *
-from general.analysis_method import *
-from general.plot_method import *
-from general.format_trans import *
+from analysis.file_structure import *
+from analysis.analysis_method import *
+from analysis.plot_method import *
+from analysis.format_trans import *
 
 # 1. Sample path setting
-sample_name = "ITRI_Nb_RD_152"
+sample_name = "230714_2SQ2CQ_CA25HF_cav"
 project_folder = r"Z:\data\resonator" # empty string "" for relative path 
-attenuation = 93
+attenuation = 113
 
 VNA_minpower = -60
 # 1.1 File structure setting
@@ -54,7 +54,7 @@ for cav_label, flist in subgroup_struc.items():
     powerQ_result.Name = cav_label
 
     # plot_fitdata(raw_dfs)
-"""
+
 
     ## Save result
     save_power_dep(powerQ_result, f"{power_dep_folder}/{cav_label}.csv")
@@ -166,4 +166,3 @@ for i, p in enumerate(plot_list):
 # plot_df(sample_statistic, ("center_linewidth","A_TLS","A_TLS_err",None), log_scale=(True,True), title=("","Center Linewidth (um)","TLS Loss"), output=f"{result_folder}/clw/A_TLS")
 # plot_df(sample_statistic, ("center_linewidth","const","const_err",None), log_scale=(True,True), title=("","Center Linewidth (um))","Const Loss"), output=f"{result_folder}/clw/const" )
 # plot_df(sample_statistic, ("center_linewidth","nc","nc_err",None), log_scale=(True,True), title=("","Center Linewidth (um)","nc"), output=f"{result_folder}/clw/nc" )
-"""
