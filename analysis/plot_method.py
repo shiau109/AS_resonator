@@ -17,7 +17,7 @@ default_plot_style = {
     "yscale":"linear"
 }
 
-def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, dependency:np.array, title=None, output_fd=None):
+def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, dependency:np.ndarray, title=None, output_fd=None):
     
     fig = plt.figure(facecolor='white',figsize=(20,9))
     fig.tight_layout()
@@ -110,7 +110,7 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
     ax_iq.legend()
 
     if output_fd != None :
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        # print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         full_path = f"{output_fd}/{title}_fitcurve.png"
         print(f"Saving plot at {full_path}")
         plt.savefig(f"{full_path}")

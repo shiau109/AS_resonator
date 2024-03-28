@@ -3,6 +3,8 @@ from shutil import rmtree
 from os.path import isfile, join,exists
 import numpy as np
 from pandas import DataFrame
+
+
 def check_configure( sample_fdname, subfd_names ):
     rawdata_folder = f"{sample_fdname}/raw"
     result_folder = f"{sample_fdname}/results"
@@ -47,7 +49,7 @@ def check_subgroup( filename_list, delimiter='_' ):
 
     sg_list = []
     for fn in filename_list:
-        subgroup = fn.split("_")[0]
+        subgroup = fn.split(delimiter)[0]
         sg_list.append(subgroup)
 
     subgroups, sg_counts = np.unique(sg_list, return_counts=True)
@@ -57,7 +59,7 @@ def check_subgroup( filename_list, delimiter='_' ):
         file_strcture[sg_name] = []
 
     for fn in filename_list:
-        subgroup = fn.split("_")[0]
+        subgroup = fn.split(delimiter)[0]
         subgroup_idx = np.where(subgroups == subgroup)
         #file_idx = int(fn.split("_")[1])
         #if file_idx < sg_counts[subgroup_idx]:
