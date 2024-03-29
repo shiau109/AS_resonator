@@ -1,12 +1,10 @@
 import numpy as np
 
-# Example array
-arr = np.array([[1, 20, 3], [4, 5, 60]])
+# Start with an empty array (shape (0, n) for n columns if appending rows, or (m, 0) for m rows if appending columns)
+arr = np.empty((0), int)
 
-# Value to compare against
-threshold = 10
-
-# Modify elements that are greater than the threshold
-arr[arr > threshold] = threshold
+# Append rows to the array
+arr = np.append(arr, [1, 2, 3], axis=0)
+arr = np.append(arr, [4, 5, 6], axis=0)
 
 print(arr)

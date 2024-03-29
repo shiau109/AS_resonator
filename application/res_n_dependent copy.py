@@ -28,36 +28,17 @@ subgroup_struc = check_subgroup(mat_files)
 # 2. Fit each cavity file(mat file)
 tanloss_results = []
 for cav_label, flist in subgroup_struc.items():
-    powerQ_results_free = []
-    powerQ_results_refined = []
-    # 2.1 Merge same cavity data
-    powerQ_raws = []
-    raw_dfs = []
-    merged_zdata = None
-    seleted_power = []
-    for fn in flist:
-        input_power, freq, zdata = mat_to_numpy(f"{raw_data_fd}/{fn}.mat")
-        print(input_power)
-        zdata = zdata.transpose()
-        if type(merged_zdata) == type(None):
-            merged_zdata = zdata
-        else:
-            merged_zdata = np.vstack((merged_zdata, zdata))
-        freq *=1e9
-        
-        for p in input_power.tolist():
-            if p > VNA_minpower:
-                seleted_power.append(p)
-            else:
-                seleted_power.append(VNA_minpower)
-
     print(f"{cav_label} fitting...")
-    power_mk = np.array(seleted_power)-attenuation
+
+    powerQ_results_free = []
+    # 2.1 Merge same cavity data
+    merged_zdata, merged_power, freq = combine_data( flist, raw_data_fd)
+    power_mk = np.array(merged_power)-attenuation
     print(f"First try")
     df_fitParas_free, zdatas_norm_free, fitCurves_norm_free = fit_resonator_batch(freq, merged_zdata, power=power_mk)
     powerQ_results_free.append( df_fitParas_free )
     
-    plot_cavityS21_fitting( freq, zdatas_norm_free, fitCurves_norm_free, input_power, title=f"{cav_label}_free", output_fd=power_dep_folder )
+    plot_cavityS21_fitting( freq, zdatas_norm_free, fitCurves_norm_free, merged_power, title=f"{cav_label}_free", output_fd=power_dep_folder )
     df_powerQ_results_free = pd.concat(powerQ_results_free)
     df_powerQ_results_free.Name = cav_label
     ## Save result
@@ -69,6 +50,7 @@ for cav_label, flist in subgroup_struc.items():
     print(f"delay:{delay_refined},\namp_norm{amp_refined},\nQc{Qc_refined},\nalpha{alpha_refined}")
 
     print(f"Second try")
+    powerQ_results_refined = []
     df_fitParas_refined, zdatas_norm_refined, fitCurves_norm_refined = fit_resonator_batch(freq, merged_zdata, power=power_mk, delay=delay_refined, Qc=Qc_refined, amp_norm=None, alpha=None)
     powerQ_results_refined.append( df_fitParas_refined )
 

@@ -1,30 +1,29 @@
 import scipy.io
 import pandas as pd
 import numpy as np
-
-def combine_data( subgroup:dict, raw_data_fd, power_limit=(-60,15) ):
+# , power_limit=(-60,15)
+        # min_power = power_limit[0]
+        # max_power = power_limit[1]
+        # input_power[input_power<min_power] = min_power
+        # input_power[input_power>max_power] = max_power
+def combine_data( combine_list:list, raw_data_fd ):
     """
     Merge data of the same resonator
     """
-    for cav_label, flist in subgroup.items():
 
-        merged_zdata = None
-        checked_power = []
-        for fn in flist:
-            input_power, freq, zdata = mat_to_numpy(f"{raw_data_fd}/{fn}.mat")
-            zdata = zdata.transpose()
-            if type(merged_zdata) == type(None):
-                merged_zdata = zdata
-            else:
-                merged_zdata = np.vstack((merged_zdata, zdata))
-            freq *=1e9
-            
-            min_power = power_limit[0]
-            max_power = power_limit[1]
-            input_power[input_power<min_power] = min_power
-            input_power[input_power>max_power] = max_power
-            checked_power.append(input_power)
+    merged_zdata = []
+    merged_power = np.empty((0))
+    for fn in combine_list:
+        input_power, freq, zdata = mat_to_numpy(f"{raw_data_fd}/{fn}.mat")
+        zdata = zdata.transpose()
 
+        merged_zdata = np.append(zdata)
+
+        merged_power = np.append(merged_power, input_power, axis=0)
+    merged_zdata = np.array(merged_zdata)
+    return merged_zdata, merged_power, freq
+
+        
 
 def mat_to_numpy( file_name ):
 
