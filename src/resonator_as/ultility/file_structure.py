@@ -6,7 +6,7 @@ from pandas import DataFrame
 
 
 def check_configure( sample_fdname, subfd_names ):
-    rawdata_folder = f"{sample_fdname}/raw"
+    # rawdata_folder = f"{sample_fdname}/raw"
     result_folder = f"{sample_fdname}/results"
     if not exists(result_folder):
         makedirs(result_folder)
@@ -27,7 +27,20 @@ def check_configure( sample_fdname, subfd_names ):
                 print(f"Subfolder {subfd} is initialized!")
             else:
                 print(f"Results for this sample Exist!")
-
+def create_subfolder( main_fd, sub_fd ):
+    fullpath_sub_fd = f"{main_fd}/{sub_fd}"
+    if not exists(fullpath_sub_fd):
+        makedirs(fullpath_sub_fd)
+        print(f"Create subfolder {fullpath_sub_fd} in result!")
+    else:
+        # cover = input("This sample has a record, overwrite it or not (y/n): ")
+        # if cover.lower() == "y" or cover.lower() == "yes":
+        #     rmtree(subfd)
+        #     makedirs(subfd)
+        #     print(f"Subfolder {subfd} is initialized!")
+        # else:
+        #     print(f"Results for this sample Exist!")
+        pass
 def check_file_extension( fd_name:str, file_ext:str ):
     """
     return a list of file name with specific file extension

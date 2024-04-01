@@ -4,8 +4,8 @@ import scipy.io
 import pandas as pd
 from scipy.optimize import curve_fit 
 import numpy as np
-
-def fit_resonator_batch( freq:np.ndarray, zdata:np.ndarray, power:np.ndarray=None, delay=None, Qc=None, alpha=None, amp_norm=None ):
+from typing import Tuple
+def fit_resonator_batch( freq:np.ndarray, zdata:np.ndarray, power:np.ndarray=None, delay=None, Qc=None, alpha=None, amp_norm=None )->Tuple[pd.DataFrame,list,list]:
 
     # Fit part
     fitParas = []
@@ -22,7 +22,7 @@ def fit_resonator_batch( freq:np.ndarray, zdata:np.ndarray, power:np.ndarray=Non
     zdatas_norm = []   
 
     for xi in range(zdata.shape[0]):
-        print(f"power {power[xi]}")
+        print(f"fitting power {power[xi]}")
         zdata_single = zdata[xi]
         fit_results, zdata_norm, fit_curve_norm = fit_resonator(freq, zdata_single, input_power=power[xi], delay=delay, Qc=Qc, alpha=alpha, amp_norm=amp_norm)
 

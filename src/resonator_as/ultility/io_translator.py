@@ -1,6 +1,7 @@
 import scipy.io
 import pandas as pd
 import numpy as np
+import xarray as xr
 # , power_limit=(-60,15)
         # min_power = power_limit[0]
         # max_power = power_limit[1]
@@ -22,6 +23,17 @@ def combine_data( combine_list:list, raw_data_fd ):
         merged_power = np.append(merged_power, input_power, axis=0)
     merged_zdata = np.array(merged_zdata)
     return merged_zdata, merged_power, freq
+
+def to_dataset( zdata, frequency, power ):
+    merged_data = {
+        "zdata":( ["mixer","power","frequency"],
+                               np.array([zdata.real, zdata.imag]) )
+    }
+    dataset = xr.Dataset(
+        merged_data,
+        coords={ "mixer":np.array(["I","Q"]), "frequency": frequency, "power": power }
+    )
+    return dataset
 
         
 

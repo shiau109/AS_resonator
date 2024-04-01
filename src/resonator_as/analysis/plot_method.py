@@ -110,7 +110,6 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
     ax_iq.legend()
 
     if output_fd != None :
-        # print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         full_path = f"{output_fd}/{title}_fitcurve.png"
         print(f"Saving plot at {full_path}")
         plt.savefig(f"{full_path}")
@@ -118,7 +117,88 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
     else:
         plt.show()
 
+def plot_resonatorFitting( labels, plot_data, color=None, output_fd=None ):
+    
+    plotObj = _plotFrame_resonatorFitting()
+    fig = plotObj[0]
+    for i, l in enumerate(labels):
+        if type(color)==type(None):
+            c = None
+        else:
+            c = color[i]
 
+        freq = plot_data[i][0]
+        rawdata = plot_data[i][1]
+        fitcurve = plot_data[i][2]
+        _plot_add_resonatorFitting(freq, rawdata, fitcurve, l, color=c, plotObj=plotObj)
+        fig.legend()
+    if output_fd != None :
+        full_path = f"{output_fd}/fitcurve.png"
+        print(f"Saving plot at {full_path}")
+        fig.savefig(f"{full_path}")
+    else:
+        plt.show()
+
+def _plot_add_resonatorFitting(freq:np.ndarray, rawdata:np.ndarray, fitcurve:np.ndarray, legend_label, color=None, plotObj=None):
+    ax_amp = plotObj[1]
+    ax_pha = plotObj[2]
+    ax_iq = plotObj[3]
+    # plot amplitude subplot
+    _plot_abs( freq, rawdata, fitcurve, None, ax_amp, color )
+    _plot_angle( freq, rawdata, fitcurve, None, ax_pha, color )
+    _plot_iq( rawdata, fitcurve, legend_label, ax_iq, color )
+
+
+
+def _plot_abs(freq:np.ndarray, data:np.ndarray, fitcurve:np.ndarray, legend_label, axObj:plt.Axes, color=None):
+    data = np.abs(data)
+    fitcurve = np.abs(fitcurve)
+
+    axObj.plot( freq, data, 'o', ms=1, c=color)# , label=legend_label )
+    axObj.plot( freq, fitcurve, '-', linewidth=1, c=color)# , label=legend_label )
+
+def _plot_angle(freq:np.ndarray, data:np.ndarray, fitcurve:np.ndarray, legend_label, axObj:plt.Axes, color=None):
+    data = np.unwrap(np.angle(data))
+    fitcurve = np.angle(data)
+    axObj.plot( freq, data, 'o', ms=1, c=color)# , label=legend_label )
+    axObj.plot( freq, fitcurve, '-', linewidth=1, c=color)# , label=legend_label )
+
+def _plot_iq( data:np.ndarray, fitcurve:np.ndarray, legend_label, axObj:plt.Axes, color=None):
+    axObj.plot( data.real, data.imag, 'o', ms=1, c=color)# , label=legend_label )
+    axObj.plot( fitcurve.real, fitcurve.imag, '-', linewidth=1, c=color, label=legend_label )
+
+def _plotFrame_resonatorFitting():
+
+    fig = plt.figure(facecolor='white',figsize=(20,9))
+    fig.tight_layout()
+     
+    gs = GridSpec(2, 2)
+    
+    ax_amp = plt.subplot(gs[0,0])
+    # ax_amp.set_xlabel("Frequency (GHz)")
+    ax_amp.set_ylabel("Ampltude")
+    # ax_amp.xaxis.set_major_locator(plt.MaxNLocator(2))
+    ax_amp.locator_params(tight=True)
+
+    ax_pha = plt.subplot(gs[1,0])
+    ax_pha.set_xlabel("Frequency (GHz)")
+    ax_pha.set_ylabel("Phase (rad)")
+    ax_pha.locator_params(tight=True)
+
+    ax_iq = plt.subplot(gs[0:,1])
+    ax_iq.set_xlabel("In-phase")
+    ax_iq.set_ylabel("Quadrature")
+    ax_iq.locator_params(tight=True)
+
+    ax_iq.xaxis.set_major_locator(plt.MaxNLocator(5))
+    ax_iq.yaxis.set_major_locator(plt.MaxNLocator(5))
+    plt.subplots_adjust(left=0.15,
+                        bottom=0.15, 
+                        right=0.9, 
+                        top=0.9, 
+                        wspace=0.25, 
+                        hspace=0.25)
+    return fig, ax_amp, ax_pha, ax_iq
 
 def plot_powerdeploss_fitting( powerloss, tanloss_result, title=None, output_fd=None ):
 

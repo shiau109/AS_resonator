@@ -1,8 +1,8 @@
 import sys
 sys.path.append(r'c:\\Users\\shiau\\AS_resonator')
 
-from file_format.file_structure import *
-from file_format.format_trans import *
+from ultility.file_structure import *
+from ultility.io_translator import *
 
 from analysis.analysis_method import *
 from analysis.plot_method import *
