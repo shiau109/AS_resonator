@@ -160,10 +160,10 @@ def _plot_abs(freq:np.ndarray, data:np.ndarray, fitcurve:np.ndarray, legend_labe
     axObj.plot( freq, fitcurve, '-', linewidth=1, c=color)# , label=legend_label )
 
 def _plot_angle(freq:np.ndarray, data:np.ndarray, fitcurve:np.ndarray, legend_label, axObj:plt.Axes, color=None):
-    data = np.unwrap(np.angle(data))
-    fitcurve = np.angle(data)
-    axObj.plot( freq, data, 'o', ms=1, c=color)# , label=legend_label )
-    axObj.plot( freq, fitcurve, '-', linewidth=1, c=color)# , label=legend_label )
+    # data = np.angle(data)
+    # fitcurve = np.angle(data)
+    axObj.plot( freq, np.arctan2(data.imag,data.real), 'o', ms=1, c=color)# , label=legend_label )
+    axObj.plot( freq, np.arctan2(fitcurve.imag,fitcurve.real), '-', linewidth=1, c=color)# , label=legend_label )
 
 def _plot_iq( data:np.ndarray, fitcurve:np.ndarray, legend_label, axObj:plt.Axes, color=None):
     axObj.plot( data.real, data.imag, 'o', ms=1, c=color)# , label=legend_label )
