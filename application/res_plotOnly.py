@@ -1,4 +1,3 @@
-
 from resonator_as.ultility.file_structure import *
 from resonator_as.ultility.io_translator import *
 # from analysis.analysis_method import *
@@ -16,11 +15,6 @@ result_folder = f"{project_folder}/{sample_name}/results"
 
 fit_folder = f"{result_folder}/power_dep_fit"
 
-check_configure(f"{sample_root}", ["power_dep_fit"])
-
-
-# subgroup_struc = check_subgroup(mat_files)
-
 # each cavity file(mat file)
 from resonator_as.analysis.photon_dep import PhotonDepResonator 
 all_resonator_result = []
@@ -29,22 +23,6 @@ folder_list = [d for d in os.listdir(raw_data_fd) if os.path.isdir(os.path.join(
 for cav_label in folder_list:
     create_subfolder(fit_folder,cav_label)
     result_folder = f"{fit_folder}/{cav_label}"
-
-    resonator_data_folder = f"{raw_data_fd}/{cav_label}"
-    resonator = PhotonDepResonator(cav_label)
-    # Find cavity data (mat file) in the folder
-    mat_files = check_file_extension( resonator_data_folder, "mat")
-    df_config = pd.read_json(f'{resonator_data_folder}/config.json')
-    for index, row in df_config.iterrows():
-        attenuation = row["attenuation"]
-        file_name = row["file_name"]
-        print(f"{file_name} with {attenuation} dB attenuation")
-        resonator.import_mat(f"{resonator_data_folder}/{file_name}",attenuation)
-    result = resonator.refined_analysis( result_folder )
-    all_resonator_result.append( result )
-    
-    df_results = pd.concat(all_resonator_result)
-    df_results.Name = cav_label
 
     # Plotting
     df_powerQ_free = pd.read_csv( f"{fit_folder}/{cav_label}/free_result.csv" )
@@ -60,4 +38,3 @@ for cav_label in folder_list:
 assignment = pd.read_json(f"{raw_data_fd}/assignment.json")
 plot_multiRes_powerQ_free( fit_folder, assignment, fit_folder)
 plot_multiRes_powerQ_refined( fit_folder, assignment, fit_folder)
-

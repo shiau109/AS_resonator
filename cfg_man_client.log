@@ -1,0 +1,76 @@
+2024-04-22 17:53:55,349 note  | 
+2024-04-22 17:53:55,351 note  | --- Qblox Configuration Manager version 0.2.0 ---
+2024-04-22 17:53:55,352 note  | 
+2024-04-22 17:53:55,352 note  | Trying to connect to "192.168.0.2"...
+2024-04-22 17:53:55,353 info  | Resolving device identifier "192.168.0.2"...
+2024-04-22 17:53:55,353 info  | "192.168.0.2" is a valid IP address; skipping name resolution.
+2024-04-22 17:53:55,353 info  | Trying to connect to application (port 5025)...
+2024-04-22 17:53:55,353 info  | Failed to connect to application ([WinError 10065] 通訊端操作無法連線到主機。), falling back to cfg_man.
+2024-04-22 17:53:55,363 info  | Trying to connect to configuration manager (port 5026)...
+2024-04-22 17:53:55,365 info  | Failed to connect to configuration manager ([WinError 10065] 通訊端操作無法連線到主機。)
+2024-04-22 17:53:55,365 ERROR | RuntimeError: Failed to connect to "192.168.0.2", determined to be at 192.168.0.2.
+2024-04-22 17:53:55,365 info  | Closing all registered instruments
+2024-04-22 17:54:05,629 note  | 
+2024-04-22 17:54:05,629 note  | --- Qblox Configuration Manager version 0.2.0 ---
+2024-04-22 17:54:05,629 note  | 
+2024-04-22 17:54:05,629 ERROR | ValueError: Unsupported command "setip"
+2024-04-22 17:54:05,629 info  | Closing all registered instruments
+2024-04-22 17:54:19,350 note  | 
+2024-04-22 17:54:19,350 note  | --- Qblox Configuration Manager version 0.2.0 ---
+2024-04-22 17:54:19,352 note  | 
+2024-04-22 17:54:19,352 note  | Trying to connect to "192.168.0.2"...
+2024-04-22 17:54:19,352 info  | Resolving device identifier "192.168.0.2"...
+2024-04-22 17:54:19,352 info  | "192.168.0.2" is a valid IP address; skipping name resolution.
+2024-04-22 17:54:19,352 info  | Trying to connect to application (port 5025)...
+2024-04-22 17:54:19,352 info  | Failed to connect to application ([WinError 10065] 通訊端操作無法連線到主機。), falling back to cfg_man.
+2024-04-22 17:54:19,352 info  | Trying to connect to configuration manager (port 5026)...
+2024-04-22 17:54:19,371 info  | Failed to connect to configuration manager ([WinError 10065] 通訊端操作無法連線到主機。)
+2024-04-22 17:54:19,371 ERROR | RuntimeError: Failed to connect to "192.168.0.2", determined to be at 192.168.0.2.
+2024-04-22 17:54:19,371 info  | Closing all registered instruments
+2024-04-22 17:55:40,353 note  | 
+2024-04-22 17:55:40,353 note  | --- Qblox Configuration Manager version 0.2.0 ---
+2024-04-22 17:55:40,353 note  | 
+2024-04-22 17:55:40,353 ERROR | ValueError: Unsupported command "setip"
+2024-04-22 17:55:40,353 info  | Closing all registered instruments
+2024-04-22 17:55:52,189 note  | 
+2024-04-22 17:55:52,189 note  | --- Qblox Configuration Manager version 0.2.0 ---
+2024-04-22 17:55:52,189 note  | 
+2024-04-22 17:55:52,189 note  | Trying to connect to "192.168.0.2"...
+2024-04-22 17:55:52,192 info  | Resolving device identifier "192.168.0.2"...
+2024-04-22 17:55:52,193 info  | "192.168.0.2" is a valid IP address; skipping name resolution.
+2024-04-22 17:55:52,193 info  | Trying to connect to application (port 5025)...
+2024-04-22 17:55:52,324 note  | "192.168.0.2" is reachable via 192.168.0.2:5025 using SCPI
+2024-04-22 17:55:52,324 info  |   Connecting to            : 192.168.0.2
+2024-04-22 17:55:52,324 info  |   Via protocol             : SCPI, via TCP port 5025
+2024-04-22 17:55:52,324 info  |   Configuration scope      : entire instrument
+2024-04-22 17:55:52,324 info  |   Server version           : 0.3.0
+2024-04-22 17:55:52,324 info  |   Client version           : 0.2.0
+2024-04-22 17:55:52,324 info  |   -------------------------:-------------------------
+2024-04-22 17:55:52,324 info  |   Device type              : qblox cluster_mm
+2024-04-22 17:55:52,324 info  |   Device name              : cluster-mm
+2024-04-22 17:55:52,324 info  |   Serial number            : 00015_2411_003
+2024-04-22 17:55:52,324 info  |   IP configuration         : 192.168.0.2/24
+2024-04-22 17:55:52,324 info  |   Submodule types          : cluster_qcm, cluster_qrm
+2024-04-22 17:55:52,324 info  |   Application version      : 0.6.2, built on 2023-11-08T19:53:26 from git hash cbd2a738
+2024-04-22 17:55:52,324 info  |   FPGA firmware version    : 0.6.2, built on 2023-11-08T19:53:26 from git hash cbd2a738
+2024-04-22 17:55:52,324 info  |   Kernel module version    : 0.6.2, built on 2023-11-08T19:53:26 from git hash cbd2a738
+2024-04-22 17:55:52,324 info  |   Config. manager version  : 0.3.0, built on 2023-11-08T19:53:26 from git hash cbd2a738
+2024-04-22 17:55:52,329 note  | 
+2024-04-22 17:55:52,329       | Operations to be performed:
+2024-04-22 17:55:52,329       |  - set_ip_config('192.168.1.12/24')
+2024-04-22 17:55:52,330       |  - reboot()
+2024-04-22 17:55:52,331       | 
+2024-04-22 17:55:52,333       | On the following devices:
+2024-04-22 17:55:52,333       |  - qblox cluster_mm at address 192.168.0.2:5025 (whole instrument), with serial 00015_2411_003 and name cluster-mm
+2024-04-22 17:55:52,334       | 
+2024-04-22 17:55:52,335       | More information is available in the log file (cfg_man_client.log).
+2024-04-22 17:55:52,335       | 
+2024-04-22 17:55:52,335       | Do you want to continue? [Y/N]
+2024-04-22 17:55:54,130       | 
+2024-04-22 17:55:54,130 note  | Proceeding with qblox cluster_mm at address 192.168.0.2:5025 (whole instrument), with serial 00015_2411_003 and name cluster-mm...
+2024-04-22 17:55:54,171 note  | Calling set_ip_config on 192.168.0.2:5025...
+2024-04-22 17:55:54,171 note  | Calling reboot on 192.168.0.2:5025...
+2024-04-22 17:55:54,255 note  | Done with 192.168.0.2:5025.
+2024-04-22 17:55:54,255 note  | 
+2024-04-22 17:55:54,255 note  | Completed successfully.
+2024-04-22 17:55:54,255 info  | Closing all registered instruments

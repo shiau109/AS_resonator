@@ -16,6 +16,10 @@ default_plot_style = {
     "xscale":"linear",
     "yscale":"linear"
 }
+plt.rcParams['axes.labelsize'] = 20
+plt.rcParams['axes.titlesize'] = 22
+plt.rcParams['xtick.labelsize'] = 14
+plt.rcParams['ytick.labelsize'] = 14
 
 def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, dependency:np.ndarray, title=None, output_fd=None):
     
@@ -117,7 +121,7 @@ def plot_cavityS21_fitting(freq:np.ndarray, raw:np.ndarray, fit:np.ndarray, depe
     else:
         plt.show()
 
-def plot_resonatorFitting( labels, plot_data, color=None, output_fd=None ):
+def plot_resonatorFitting( labels, plot_data, title, color=None, output_fd=None  ):
     
     plotObj = _plotFrame_resonatorFitting()
     fig = plotObj[0]
@@ -133,7 +137,7 @@ def plot_resonatorFitting( labels, plot_data, color=None, output_fd=None ):
         _plot_add_resonatorFitting(freq, rawdata, fitcurve, l, color=c, plotObj=plotObj)
         fig.legend()
     if output_fd != None :
-        full_path = f"{output_fd}/fitcurve.png"
+        full_path = f"{output_fd}/{title}.png"
         print(f"Saving plot at {full_path}")
         fig.savefig(f"{full_path}")
     else:
@@ -147,8 +151,6 @@ def _plot_add_resonatorFitting(freq:np.ndarray, rawdata:np.ndarray, fitcurve:np.
     _plot_abs( freq, rawdata, fitcurve, None, ax_amp, color )
     _plot_angle( freq, rawdata, fitcurve, None, ax_pha, color )
     _plot_iq( rawdata, fitcurve, legend_label, ax_iq, color )
-
-
 
 def _plot_abs(freq:np.ndarray, data:np.ndarray, fitcurve:np.ndarray, legend_label, axObj:plt.Axes, color=None):
     data = np.abs(data)
@@ -262,7 +264,7 @@ def plot_power_dependent_Q( powerQ_result, cav_label=None, output_fd=None ):
         ("photons","Qc_dia_corr","absQc_err"),
         ("photons","Ql","Ql_err")]
     plot_list = assemble_plot_df( powerQ_result, xy_cols )
-    labels = ["Internal Q","Coupling Q", "loaded Q"]
+    labels = ["Internal Q","Coupling Q", "Loaded Q"]
     for i, p in enumerate(plot_list):
         plot_style["legend_label"] = labels[i]
         plot_basic(p, plot_style=plot_style, axObj=axObj)
@@ -279,7 +281,7 @@ def plot_power_dependent_Q( powerQ_result, cav_label=None, output_fd=None ):
     else:
         plt.show()
 
-def assemble_plot_df( data:pd.DataFrame, xy_cols:List ):
+def assemble_plot_df( data:pd.DataFrame, xy_cols:List )->List[pd.DataFrame]:
     """
     Transform a dataframe to the format for plotting
     """
@@ -432,3 +434,181 @@ def plot_df(df:pd.DataFrame, xycols, axObj=None, log_scale=(False,False), title=
         plt.savefig(f"{output}.png")
         plt.close()
     return axObj
+
+def plot_multiRes_powerQ_free( import_folder, assignment:pd.DataFrame, output=None ):
+    
+    xy_cols = [("photons","Qi_dia_corr","Qi_dia_corr_err"),
+        ("photons","Qc_dia_corr","absQc_err"),
+        ("photons","Ql","Ql_err")]
+    # plot_list = assemble_plot_df(power_dep,xy_cols)
+    y_labels = ["Internal Q", "Coupling Q", "Loaded Q"]
+    for i, xy_col in enumerate(xy_cols):
+        fig, ax = _plot_multiRes_powerQ_flex(xy_col, assignment, import_folder, "free_result")
+        ax.set_ylabel(y_labels[i])
+        fig.legend()
+        fig.suptitle(f'All Resonator (Free)')
+
+        #plt.show()
+        if output != None :
+            plt.savefig(f"{output}/all_result_{xy_cols[i][1]}_free.png")    
+   
+def plot_multiRes_powerQ_refined( import_folder, assignment:pd.DataFrame, output=None ):
+    
+    xy_cols = [("photons","Qi_dia_corr_fqc","Qi_dia_corr_err"),
+        ("photons","Qc_dia_corr_fixed","absQc_err"),
+        ("photons","Ql","Ql_err")]
+    # plot_list = assemble_plot_df(power_dep,xy_cols)
+    y_labels = ["Internal Q", "Coupling Q", "Loaded Q"]
+    for i, xy_col in enumerate(xy_cols):
+        fig, ax = _plot_multiRes_powerQ_flex(xy_col, assignment, import_folder, "refined_result")
+        ax.set_ylabel(y_labels[i])
+        fig.legend()
+        fig.suptitle(f'All Resonator (Refined)')
+
+        #plt.show()
+        if output != None :
+            plt.savefig(f"{output}/all_result_{xy_cols[i][1]}_refined.png")
+
+def _plot_multiRes_powerQ_flex( xy_col, assignment, import_folder, file_name ):
+
+    fig, ax = _plotFrame_multiRes_powerQ()
+    # ax.set_ylabel(y_labels[i])
+
+    for label in assignment['measurement_label'].to_numpy():
+        print(f"ploting {label}")
+        file_path = f"{import_folder}/{label}/{file_name}.csv"
+        power_dep = pd.read_csv( file_path )
+        df_plot = assemble_plot_df(power_dep,[xy_col])[0]
+        asi = assignment.loc[assignment['measurement_label'] == label]
+        _add_plot_multiRes_powerQ(df_plot, asi, ax)
+
+    # fig.legend()
+    # fig.suptitle(f'All Resonator (Free)')
+
+    return fig, ax 
+def _add_plot_multiRes_powerQ( data:pd.DataFrame, asi, ax:plt.Axes):
+
+
+    a_marker_style = asi["marker_style"].values[0]
+    a_color = asi["color"].values[0]
+    lw = asi["center_linewidth"].values[0]
+    label = asi['measurement_label'].values[0]
+
+    ax.errorbar(data["x"].values, data["y"].values, yerr=data["yerr"].values, ms = 5, fmt=a_marker_style, c=a_color, label=f"{label}-{lw}um")
+
+def _plotFrame_multiRes_powerQ( )->Tuple[plt.Figure,plt.Axes]:
+
+    fig = plt.figure(facecolor='white',figsize=(20,9))
+
+    ax = fig.subplots()
+    # ax_amp.xaxis.set_major_locator(plt.MaxNLocator(2))
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    
+    fig.subplots_adjust(left=0.15,
+                        bottom=0.15, 
+                        right=0.9, 
+                        top=0.9, 
+                        wspace=0.25, 
+                        hspace=0.25)
+    return fig, ax
+
+def plot_singleRes_powerQ_refined( powerQ_result, cav_label=None, output_fd=None ):
+
+    fig, ax = _plotFrame_singleRes_power()
+    ax.set_ylabel("Quality factor")
+
+    xy_cols = [("photons","Qi_dia_corr_fqc","Qi_dia_corr_err"),
+        ("photons","Qc_dia_corr_fixed","absQc_err"),
+        ("photons","Ql","Ql_err")]
+    plot_list = assemble_plot_df( powerQ_result, xy_cols )
+    labels = ["Internal Q","Coupling Q", "Loaded Q"]
+    for i, p in enumerate(plot_list):
+        ax.errorbar( p["x"], p["y"], yerr=p["yerr"], fmt="o", ms=5, label=f"{labels[i]}" )
+
+    ax.set_title(f"{cav_label}_refined")
+    fig.legend()
+    if output_fd != None :
+        plt.savefig(f"{output_fd}/{cav_label}_powerQ_refined.png")
+        plt.close()
+    else:
+        plt.show()
+
+def plot_singleRes_powerloss_refined( powerQ_result, cav_label=None, output_fd=None ):
+
+    fig, ax = _plotFrame_singleRes_power()
+    ax.set_ylabel("Loss")
+
+    xy_cols = [("photons","Qi_dia_corr_fqc","Qi_dia_corr_err"),
+        ("photons","Qc_dia_corr_fixed","absQc_err"),
+        ("photons","Ql","Ql_err")]
+    plot_list = assemble_plot_df( powerQ_result, xy_cols )
+    labels = ["Internal Loss","Coupling Loss", "Loaded Loss"]
+    for i, p in enumerate(plot_list):
+        ax.errorbar( p["x"], 1/p["y"],yerr=1/p["y"]*p["yerr"]/p["y"], fmt="o", ms=5, label=f"{labels[i]}" )
+    ax.set_title(f"{cav_label}_refined")
+    fig.legend()
+    if output_fd != None :
+        plt.savefig(f"{output_fd}/{cav_label}_powerloss_refined.png")
+        plt.close()
+    else:
+        plt.show()
+
+def plot_singleRes_powerQ_free( powerQ_result, cav_label=None, output_fd=None ):
+
+    fig, ax = _plotFrame_singleRes_power()
+    ax.set_ylabel("Quality factor")
+
+    xy_cols = [("photons","Qi_dia_corr","Qi_dia_corr_err"),
+        ("photons","Qc_dia_corr","absQc_err"),
+        ("photons","Ql","Ql_err")]
+    plot_list = assemble_plot_df( powerQ_result, xy_cols )
+    labels = ["Internal Q","Coupling Q", "Loaded Q"]
+    for i, p in enumerate(plot_list):
+        ax.errorbar( p["x"], p["y"], yerr=p["yerr"], fmt="o", ms=5, label=f"{labels[i]}" )
+    ax.set_title(f"{cav_label}_free")
+    fig.legend()
+    if output_fd != None :
+        plt.savefig(f"{output_fd}/{cav_label}_powerQ_free.png")
+        plt.close()
+    else:
+        plt.show()
+
+def plot_singleRes_powerloss_free( powerQ_result, cav_label=None, output_fd=None ):
+
+    fig, ax = _plotFrame_singleRes_power()
+    ax.set_ylabel("Loss")
+
+    xy_cols = [("photons","Qi_dia_corr","Qi_dia_corr_err"),
+        ("photons","Qc_dia_corr","absQc_err"),
+        ("photons","Ql","Ql_err")]
+    plot_list = assemble_plot_df( powerQ_result, xy_cols )
+    labels = ["Internal Loss","Coupling Loss", "Loaded Loss"]
+    for i, p in enumerate(plot_list):
+        ax.errorbar( p["x"], 1/p["y"], yerr=1/p["y"]*p["yerr"]/p["y"], fmt="o", ms=5, label=f"{labels[i]}" )
+    ax.set_title(f"{cav_label}_free")
+    fig.legend()
+    if output_fd != None :
+        plt.savefig(f"{output_fd}/{cav_label}_powerloss_free.png")
+        plt.close()
+    else:
+        plt.show()
+
+def _plotFrame_singleRes_power( )->Tuple[plt.Figure,plt.Axes]:
+    fig = plt.figure(facecolor='white')
+    plt.subplots_adjust(left=0.15,
+                        bottom=0.15, 
+                        right=0.9, 
+                        top=0.9, 
+                        wspace=0.25, 
+                        hspace=0.25)
+    
+    axObj = fig.add_subplot()
+    axObj.set_xlabel("Photons")
+    axObj.set_xscale("log")
+    axObj.set_yscale("log")
+    
+    axObj.legend()
+    # fig.suptitle( title )
+    return fig, axObj
